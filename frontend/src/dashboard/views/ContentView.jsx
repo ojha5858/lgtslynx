@@ -51,12 +51,10 @@ export default function ContentStrategistView() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* ===== LEFT PANEL ===== */}
       <Card className="p-6 space-y-6">
-        {/* Header */}
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
-            <FaMagic className="text-indigo-600" />
+            <FaMagic className="text-accent" />
             AI Content Strategist
           </h2>
           <p className="text-sm text-slate-500 mt-1">
@@ -64,7 +62,6 @@ export default function ContentStrategistView() {
           </p>
         </div>
 
-        {/* Input */}
         <div>
           <label className="block text-sm font-medium text-slate-600 mb-2">
             Target Keyword / Niche
@@ -74,11 +71,10 @@ export default function ContentStrategistView() {
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="e.g. Sustainable Coffee"
             className="w-full border rounded-lg px-3 py-2 text-sm outline-none
-                       focus:ring-2 focus:ring-indigo-500"
+                       focus:ring-2 focus:ring-accent"
           />
         </div>
 
-        {/* Button */}
         <button
           onClick={generateStrategy}
           disabled={loading}
@@ -87,14 +83,13 @@ export default function ContentStrategistView() {
             ${
               loading
                 ? "bg-slate-400 cursor-not-allowed text-white"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                : "bg-accent hover:bg-accent/90 text-white"
             }
           `}
         >
           {loading ? "Generating…" : "Generate Strategy"}
         </button>
 
-        {/* Existing Clusters */}
         <div className="border-t pt-4">
           <p className="text-xs font-semibold text-slate-400 mb-3">
             YOUR EXISTING CLUSTERS
@@ -105,10 +100,11 @@ export default function ContentStrategistView() {
               <div
                 key={c.name}
                 className="flex justify-between items-center
-                           bg-slate-50 rounded-lg px-3 py-2 text-sm"
+                           bg-accent/10 rounded-lg px-3 py-2 text-sm"
               >
-                <span>{c.name}</span>
-                <span className="text-xs bg-white border rounded px-2 py-0.5">
+                <span className="text-slate-700">{c.name}</span>
+                <span className="text-xs bg-white border border-accent
+                                 text-accent rounded px-2 py-0.5">
                   {c.count}
                 </span>
               </div>
@@ -117,26 +113,24 @@ export default function ContentStrategistView() {
         </div>
       </Card>
 
-      {/* ===== RIGHT PANEL (AI CONSOLE) ===== */}
       <Card className="lg:col-span-2 p-6">
         {!logs.length && !result && (
           <div
-            className="h-full border-2 border-dashed rounded-xl
+            className="h-full border-2 border-dashed border-accent/40
                        flex flex-col items-center justify-center
-                       text-center text-slate-400"
+                       rounded-xl text-center text-slate-400"
           >
-            <FaBrain className="text-4xl mb-4 text-indigo-600" />
+            <FaBrain className="text-4xl mb-4 text-accent" />
             <p className="max-w-md text-sm">
               Enter a niche to generate an AI-powered content strategy.
             </p>
           </div>
         )}
 
-        {/* Console */}
         {logs.length > 0 && (
           <div className="bg-black text-slate-200 rounded-xl p-4 font-mono text-sm mb-4 max-h-60 overflow-y-auto">
             <div className="text-slate-500 mb-2">
-              &gt; gemini-console
+              &gt; <span className="text-accent">gemini-console</span>
             </div>
 
             {logs.map((log, i) => (
@@ -159,7 +153,6 @@ export default function ContentStrategistView() {
           </div>
         )}
 
-        {/* Result */}
         {result && (
           <div>
             <h3 className="font-semibold mb-3 text-slate-800">
@@ -169,7 +162,8 @@ export default function ContentStrategistView() {
               {result.map((item, i) => (
                 <li
                   key={i}
-                  className="border rounded-lg px-4 py-2"
+                  className="border-l-4 border-accent
+                             bg-white rounded-lg px-4 py-2"
                 >
                   {item}
                 </li>

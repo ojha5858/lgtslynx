@@ -25,8 +25,8 @@ export default function Sidebar({ active, setActive }) {
         z-40
       "
     >
-      <div className="hidden md:block px-4 py-6 border-b border-slate-200">
-        <h2 className="text-xl font-bold tracking-wide text-gray-600">
+      <div className="hidden md:block px-5 py-6 border-b border-slate-200">
+        <h2 className="text-xl font-bold tracking-wide text-slate-800">
           LGTS <span className="italic text-accent">Lynx</span>
         </h2>
         <p className="text-xs text-slate-500 mt-1">
@@ -54,24 +54,25 @@ export default function Sidebar({ active, setActive }) {
               onClick={() => setActive(item.id)}
               className={`
                 flex flex-col md:flex-row
-                items-center
-                gap-1 md:gap-3
+                items-center gap-1 md:gap-3
                 flex-1 md:flex-none
                 w-full
                 text-xs md:text-sm
                 px-2 md:px-4
                 py-1.5 md:py-2
                 rounded-md
-                transition-colors
+                transition-all duration-150
                 ${
                   isActive
-                    ? "text-accent md:bg-accent/10 font-semibold"
+                    ? "text-accent bg-accent/10 font-semibold"
                     : "text-slate-600 hover:bg-slate-100"
                 }
               `}
             >
-              <Icon size={18} className="md:text-base" />
-
+              <Icon
+                size={18}
+                className={isActive ? "text-accent" : "text-slate-500"}
+              />
               <span>{item.label}</span>
             </button>
           );
@@ -79,7 +80,7 @@ export default function Sidebar({ active, setActive }) {
       </nav>
 
       <div className="hidden md:block p-4 border-t border-slate-100">
-        <div className="rounded-lg p-4 text-white bg-accent">
+        <div className="rounded-lg p-4 bg-accent text-white">
           <p className="text-xs font-medium opacity-90 mb-1">
             Pro Plan
           </p>
@@ -89,8 +90,10 @@ export default function Sidebar({ active, setActive }) {
 
           <button
             className="
-              w-full mt-3 bg-white text-accent text-xs py-1.5 rounded
-              hover:bg-slate-100 transition-colors font-semibold
+              w-full mt-3 bg-white text-accent
+              text-xs py-1.5 rounded
+              hover:bg-slate-100 transition-colors
+              font-semibold
             "
           >
             Upgrade Now

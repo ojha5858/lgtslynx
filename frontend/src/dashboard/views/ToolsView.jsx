@@ -56,17 +56,15 @@ export default function ToolsView() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-800">
           SEO Tools Suite
         </h1>
-        <button className="text-sm text-indigo-600 hover:underline">
+        <button className="text-sm text-accent hover:underline">
           Manage Subscription
         </button>
       </div>
 
-      {/* Tools Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {TOOLS.map((tool) => {
           const Icon = tool.icon;
@@ -82,12 +80,15 @@ export default function ToolsView() {
                 }
               `}
             >
-              <div className="w-12 h-12 mx-auto rounded-full bg-slate-100
-                              flex items-center justify-center text-indigo-600 mb-4">
+              <div
+                className="w-12 h-12 mx-auto rounded-full
+                           bg-accent/10 flex items-center
+                           justify-center text-accent mb-4"
+              >
                 <Icon size={22} />
               </div>
 
-              <h3 className="font-semibold text-sm">
+              <h3 className="font-semibold text-sm text-slate-800">
                 {tool.name}
               </h3>
 
@@ -95,7 +96,7 @@ export default function ToolsView() {
                 className={`mt-3 inline-block text-xs px-3 py-1 rounded-full
                   ${
                     tool.active
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-accent/10 text-accent border border-accent/30"
                       : "bg-slate-200 text-slate-500"
                   }
                 `}
@@ -107,17 +108,15 @@ export default function ToolsView() {
         })}
       </div>
 
-      {/* Smart Content Auditor */}
       <Card className="overflow-hidden">
         <div className="px-6 py-4 border-b bg-slate-50">
-          <h3 className="font-semibold flex items-center gap-2">
-            <FaMagic className="text-indigo-600" />
+          <h3 className="font-semibold flex items-center gap-2 text-slate-800">
+            <FaMagic className="text-accent" />
             Smart Content Auditor
           </h3>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-          {/* Input */}
           <div className="space-y-4">
             <textarea
               rows={8}
@@ -125,46 +124,47 @@ export default function ToolsView() {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Paste your blog or landing page copy here..."
               className="w-full border rounded-lg p-4 text-sm outline-none
-                         focus:ring-2 focus:ring-indigo-400"
+                         focus:ring-2 focus:ring-accent/40"
             />
 
             <button
               onClick={auditContent}
               disabled={loading}
-              className={`w-full py-3 rounded-lg font-semibold transition
+              className={`
+                w-full py-3 rounded-lg font-semibold transition
+                flex items-center justify-center gap-2
                 ${
                   loading
-                    ? "bg-slate-400 cursor-not-allowed"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                    ? "bg-accent/70 cursor-not-allowed text-white"
+                    : "bg-accent hover:bg-accent/90 text-white"
                 }
               `}
             >
-              <span className="flex items-center justify-center gap-2">
-                <FaCogs />
-                {loading ? "Auditing…" : "Audit Content"}
-              </span>
+              <FaCogs className={loading ? "animate-spin" : ""} />
+              {loading ? "Auditing…" : "Audit Content"}
             </button>
           </div>
 
-          {/* Output */}
           <div>
             {!logs.length && !result && (
               <div
-                className="h-full border rounded-lg bg-slate-50
-                           flex flex-col items-center justify-center
+                className="h-full border border-dashed border-accent/30
+                           rounded-lg bg-accent/5 flex flex-col
+                           items-center justify-center
                            text-slate-400 text-sm"
               >
-                <FaChartBar size={36} className="mb-3" />
+                <FaChartBar size={36} className="mb-3 text-accent" />
                 AI insights will appear here.
               </div>
             )}
 
-            {/* Console */}
             {logs.length > 0 && (
-              <div className="bg-black text-slate-200 rounded-lg p-4
-                              font-mono text-sm mb-4 max-h-48 overflow-y-auto">
+              <div
+                className="bg-black text-slate-200 rounded-lg p-4
+                           font-mono text-sm mb-4 max-h-48 overflow-y-auto"
+              >
                 <div className="text-slate-500 mb-2">
-                  &gt; content-auditor
+                  &gt; <span className="text-accent">content-auditor</span>
                 </div>
 
                 {logs.map((log, i) => (
@@ -187,13 +187,13 @@ export default function ToolsView() {
               </div>
             )}
 
-            {/* Result */}
             {result && (
               <ul className="space-y-2 text-sm">
                 {result.map((r, i) => (
                   <li
                     key={i}
-                    className="border rounded-lg px-4 py-2"
+                    className="border-l-4 border-accent
+                               bg-white rounded-lg px-4 py-2"
                   >
                     {r}
                   </li>

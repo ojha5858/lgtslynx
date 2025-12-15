@@ -49,54 +49,57 @@ export default function IndexingView() {
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2">
-          <FaBolt className="text-indigo-500" />
+          <FaBolt className="text-accent" />
           Fast Indexing Module
         </h1>
         <p className="text-slate-500 mt-1">
-          Trigger indexing signals & monitor server output.
+          Trigger indexing signals & monitor server output
         </p>
       </div>
 
       <Card className="p-8">
         <div className="space-y-6">
-          {/* URL */}
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-2">
               Target URL
             </label>
-            <div className="flex border rounded-lg overflow-hidden">
-              <span className="px-3 py-2 bg-slate-50 text-slate-500 text-sm border-r flex items-center gap-2">
+
+            <div className="flex border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-accent/40">
+              <span className="px-3 py-2 bg-slate-100 text-slate-600 text-sm border-r flex items-center gap-2">
                 <FaLink size={12} />
                 https://
               </span>
+
               <input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="example.com/new-page"
-                className="flex-1 px-3 py-2 outline-none text-sm"
+                className="flex-1 px-3 py-2 outline-none text-sm text-slate-700"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer">
+            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer hover:bg-slate-50">
               <input
                 type="checkbox"
                 checked={pingGSC}
                 onChange={() => setPingGSC(!pingGSC)}
+                className="accent-accent"
               />
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium text-slate-700">
                 Ping Google Search Console
               </span>
             </label>
 
-            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer">
+            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer hover:bg-slate-50">
               <input
                 type="checkbox"
                 checked={updateSitemap}
                 onChange={() => setUpdateSitemap(!updateSitemap)}
+                className="accent-accent"
               />
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium text-slate-700">
                 Update Sitemap.xml
               </span>
             </label>
@@ -107,15 +110,16 @@ export default function IndexingView() {
             disabled={loading}
             className={`
               w-full py-3 rounded-lg font-semibold
-              flex items-center justify-center gap-2 transition
+              flex items-center justify-center gap-2
+              transition-all duration-200
               ${
                 loading
-                  ? "bg-slate-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  ? "bg-accent/70 text-white cursor-not-allowed"
+                  : "bg-accent text-white hover:bg-accent/90 active:scale-[0.98]"
               }
             `}
           >
-            <FaBolt />
+            <FaBolt className={loading ? "animate-pulse" : ""} />
             {loading ? "Processing…" : "Instant Submit"}
           </button>
         </div>
@@ -124,7 +128,7 @@ export default function IndexingView() {
       {logs.length > 0 && (
         <div className="bg-black text-slate-200 rounded-xl p-4 font-mono text-sm max-h-64 overflow-y-auto">
           <div className="text-slate-500 mb-3">
-            &gt; server-console
+            &gt; <span className="text-accent">server-console</span>
           </div>
 
           {logs.map((log, i) => (
