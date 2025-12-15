@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) =>  {
-    res.send.json({status: "OK"});
+    res.status(200).json({ status: "OK" });
 });
 
 app.use("/api/indexing", indexingRoutes);

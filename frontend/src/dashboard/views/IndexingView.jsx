@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Card from "../components/Card";
 import { FaBolt, FaLink } from "react-icons/fa";
+import {
+  submitIndexingJob,
+  fetchIndexingLogs,
+} from "../../api/indexingApi";
 
 export default function IndexingView() {
   const [url, setUrl] = useState("");
@@ -9,12 +13,9 @@ export default function IndexingView() {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
 
-  const pushLog = (type, message) => {
-    const time = new Date().toLocaleTimeString();
-    setLogs((prev) => [...prev, { type, message, time }]);
-  };
+  const pollRef = useRef(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!url.trim()) {
       pushLog("error", "Invalid URL provided");
       return;
@@ -23,26 +24,31 @@ export default function IndexingView() {
     setLogs([]);
     setLoading(true);
 
-    pushLog("info", "Initializing indexing workflow");
-    pushLog("info", "Authenticating with Google OAuth2");
+    try {
+      const { jobId } = await submitIndexingJob({
+        url,
+        pingGSC,
+        updateSitemap,
+      });
 
-    setTimeout(() => {
-      pushLog("success", "Access token refreshed");
+      pollRef.current = setInterval(async () => {
+        const res = await fetchIndexingLogs(jobId);
+        setLogs(res.logs);
 
-      pingGSC
-        ? pushLog("info", "Pinging Google Search Console")
-        : pushLog("warn", "Search Console ping skipped");
+        if (res.status === "done" || res.status === "failed") {
+          clearInterval(pollRef.current);
+          setLoading(false);
+        }
+      }, 1500);
+    } catch (err) {
+      pushLog("error", err.message);
+      setLoading(false);
+    }
+  };
 
-      updateSitemap
-        ? pushLog("info", "Updating sitemap.xml")
-        : pushLog("warn", "Sitemap update skipped");
-
-      setTimeout(() => {
-        pushLog("success", "URL submitted successfully");
-        pushLog("info", "Waiting for Google crawl signal…");
-        setLoading(false);
-      }, 1200);
-    }, 800);
+  const pushLog = (type, message) => {
+    const time = new Date().toLocaleTimeString();
+    setLogs((prev) => [...prev, { type, message, time }]);
   };
 
   return (
@@ -80,26 +86,26 @@ export default function IndexingView() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer hover:bg-slate-50">
+            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={pingGSC}
                 onChange={() => setPingGSC(!pingGSC)}
                 className="accent-accent"
               />
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium">
                 Ping Google Search Console
               </span>
             </label>
 
-            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer hover:bg-slate-50">
+            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={updateSitemap}
                 onChange={() => setUpdateSitemap(!updateSitemap)}
                 className="accent-accent"
               />
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium">
                 Update Sitemap.xml
               </span>
             </label>
@@ -108,16 +114,12 @@ export default function IndexingView() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className={`
-              w-full py-3 rounded-lg font-semibold
-              flex items-center justify-center gap-2
-              transition-all duration-200
+            className={`w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2
               ${
                 loading
-                  ? "bg-accent/70 text-white cursor-not-allowed"
-                  : "bg-accent text-white hover:bg-accent/90 active:scale-[0.98]"
-              }
-            `}
+                  ? "bg-accent/70 cursor-not-allowed"
+                  : "bg-accent hover:bg-accent/90"
+              } text-white`}
           >
             <FaBolt className={loading ? "animate-pulse" : ""} />
             {loading ? "Processing…" : "Instant Submit"}
