@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/logo.png" type="image/png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LGTS Lynx</title>
+
+    <!-- Tailwind CDN (abhi theek hai) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#654321",
+              accent: "#B8860B",
+              dark: "#2C3E50",
+              light: "#F5F5DC",
+              muted: "#F5F5DC",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="bg-dark text-light">
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
