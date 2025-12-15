@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000/api/indexing";
+const API_BASE = "https://vigilant-journey-65q46wx54qhwpv-5000.app.github.dev/api/indexing";
 
 export const submitIndexingJob = async (payload) => {
   const res = await fetch(`${API_BASE}/submit`, {
