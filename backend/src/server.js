@@ -1,7 +1,8 @@
-require("dotenv").config(); // MUST be first
+require("dotenv").config();
 
 const mongoose = require("mongoose");
 const app = require("../app");
+const { logger } = require("./utils/logger");
 
 const PORT = process.env.PORT || 5000;
 
@@ -10,12 +11,12 @@ mongoose
     serverSelectionTimeoutMS: 5000,
   })
   .then(() => {
-    console.log("✅ MongoDB connected");
+    logger.info("MongoDB connected");
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      logger.info(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB error:", err);
+    logger.info("MongoDB error:", err);
   });

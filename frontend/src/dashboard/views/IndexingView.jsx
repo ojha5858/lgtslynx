@@ -35,7 +35,7 @@ export default function IndexingView() {
         const res = await fetchIndexingLogs(jobId);
         setLogs(res.logs);
 
-        if (res.status === "done" || res.status === "failed") {
+        if (res.status === "submitted" || res.status === "failed") {
           clearInterval(pollRef.current);
           setLoading(false);
         }

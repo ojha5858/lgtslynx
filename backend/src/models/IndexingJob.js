@@ -18,7 +18,7 @@ const indexingJobSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["queued", "processing", "done", "failed"],
+      enum: ["queued", "processing", "submitted", "signals_sent", "done", "failed"],
       default: "queued",
     },
     logs: [logSchema],

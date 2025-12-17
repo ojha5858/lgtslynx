@@ -1,14 +1,8 @@
-const IORedis = require("ioredis");
-const { logger } = require("../utils/logger");
+const { Queue } = require("bullmq");
+const { redis } = require("../config/redis");
 
-const redis = new IORedis(process.env.REDIS_URL);
-
-redis.on("connect", () => {
-  logger.info("Redis connected (Codespaces)");
+const indexingQueue = new Queue("indexing", {
+  connection: redis,
 });
 
-redis.on("error", (err) => {
-  logger.error("Redis error: " + err.message);
-});
-
-module.exports = { redis };
+module.exports = { indexingQueue };

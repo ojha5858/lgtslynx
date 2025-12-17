@@ -22,12 +22,12 @@ export default function SEOPlatform() {
       setActive={setActive}
       title={pageTitles[active]}
     >
-      <p className="text-slate-600">
+      <div className="text-slate-600">
         {active === "dashboard" && <DashboardHome />}
         {active === "indexing" && <IndexingView />}
         {active === "content" && <ContentView />}
         {active === "tools" && <ToolsView />}
-      </p>
+      </div>
     </DashboardLayout>
   );
 }
