@@ -2,16 +2,24 @@ const IndexingJob = require("../models/IndexingJob");
 const { indexingQueue } = require("../queues/indexing.queue");
 const { logger } = require("../utils/logger");
 
+const normalizeUrl = (url) => {
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
 
 const submitIndexingJob = async (req, res, next) => {
   try {
-    const { url, pingGSC, updateSitemap } = req.body;
+    let { url, pingGSC, updateSitemap } = req.body;
 
     if (!url) {
       const err = new Error("URL is required");
       err.statusCode = 400;
       throw err;
     }
+
+    url = normalizeUrl(url);
 
     const job = await IndexingJob.create({
       url,
@@ -22,18 +30,18 @@ const submitIndexingJob = async (req, res, next) => {
       jobId: job._id,
     });
 
-    logger.info(`Indexing job queued: ${job._id}`);
+    logger.info(`Indexing job queued: ${job._id} | ${url}`);
 
     res.status(201).json({
       success: true,
       jobId: job._id,
       status: "queued",
+      url,
     });
   } catch (err) {
     next(err);
   }
 };
-
 const normalizeLogs = (logs = []) => {
   return logs.map((log) => {
     let message = "";

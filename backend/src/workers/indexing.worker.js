@@ -88,12 +88,13 @@ new Worker(
           );
         } catch (err) {
           const msg = err?.message || "";
+          console.log("msg", err)
 
           if (msg.includes("Permission denied")) {
             await pushLog(
               jobId,
               "warning",
-              "Google ownership verification failed. Falling back to suggestion mode."
+              msg
             );
 
             await pushLog(
@@ -179,36 +180,59 @@ new Worker(
           );
         }
       }
+      console.log("domain", domain)
+      const canonicalDomain = domain.replace("://www.", "://");
+
+      console.log("canonicalDomain", canonicalDomain)
 
       const sitemaps = [
-        `${domain}/sitemap.xml`,
-        `${domain}/sitemap_index.xml`,
-        `${domain}/sitemap-index.xml`,
+        `${canonicalDomain}/sitemap.xml`,
       ];
-
+      console.log("sitemapCandidates", sitemaps)
       let sitemapPinged = false;
 
       for (const sm of sitemaps) {
         try {
           const r = await axios.get(sm, {
             timeout: 8000,
-            validateStatus: () => true,
+            maxRedirects: 5,
+            validateStatus: (status) => status >= 200 && status < 500,
           });
 
-          if (r.status === 200) {
-            await axios.get(
-              `https://www.google.com/ping?sitemap=${encodeURIComponent(sm)}`
+          if (r.status === 200 && typeof r.data === "string") {
+            await pushLog(
+              jobId,
+              "info",
+              `Sitemap detected (Google auto-discovers via GSC): ${sm}`
             );
-            await pushLog(jobId, "info", `Sitemap pinged: ${sm}`);
             sitemapPinged = true;
             break;
           }
-        } catch {}
+          else {
+            await pushLog(
+              jobId,
+              "warning",
+              `Sitemap check failed (${r.status}): ${sm}`
+            );
+          }
+        } catch (err) {
+          console.log(err)
+          await pushLog(
+            jobId,
+            "warning",
+            `Sitemap fetch error: ${sm} (${err?.message || "unknown"})`
+          );
+        }
       }
 
       if (!sitemapPinged) {
-        await pushLog(jobId, "info", "No sitemap found or pinged");
+        await pushLog(
+          jobId,
+          "info",
+          "No valid sitemap found on canonical domain"
+        );
       }
+
 
       await IndexingJob.updateOne(
         { _id: jobId },

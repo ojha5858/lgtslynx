@@ -1,5 +1,6 @@
 const { logger } = require("../utils/logger");
 const { generateWithOpenAI } = require("../services/open.service");
+const ContentStrategy = require("../models/ContentStrategy");
 
 const extractJSON = (text) => {
     const cleaned = text
@@ -34,21 +35,16 @@ const generateContentStrategy = async (req, res, next) => {
         pushLog("info", "Calling OpenAI");
         pushLog("info", `Analyzing niche: "${keyword}"`);
 
-        const prompt = `
-Create an SEO content strategy.
-
-Keyword: "${keyword}"
-
-Return ONLY valid JSON.
-Do not add markdown or explanations.
-
-Format:
-{
-  "pillar": "",
-  "clusters": [],
-  "calendar": []
-}
-`;
+        const prompt = ` Create an SEO content strategy.
+        Keyword: "${keyword}"
+        Return ONLY valid JSON.
+        Do not add markdown or explanations.
+        Format:
+        {
+        "pillar": "",
+        "clusters": [],
+        "calendar": []
+        }`;
 
         const aiText = await generateWithOpenAI(prompt);
 
@@ -64,12 +60,29 @@ Format:
 
         pushLog("success", "AI content strategy generated");
 
+        let savedStrategy;
+        try {
+            savedStrategy = await ContentStrategy.create({
+                keyword,
+                pillar: result.pillar,
+                clusters: result.clusters,
+                calendar: result.calendar,
+                rawResponse: result,
+                logs,
+            });
+        } catch (dbErr) {
+            console.error("DB SAVE ERROR", dbErr);
+            throw dbErr;
+        }
+
+
         res.json({
             success: true,
+            strategyId: savedStrategy._id,
             keyword,
             logs,
             result,
-            generatedAt: new Date(),
+            generatedAt: savedStrategy.createdAt,
         });
     } catch (err) {
         logger.error("Content strategist error", err);
