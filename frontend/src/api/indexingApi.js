@@ -1,4 +1,4 @@
-const API_BASE = "https://vigilant-journey-65q46wx54qhwpv-5000.app.github.dev/api";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const submitIndexingJob = async (payload) => {
   const res = await fetch(`${API_BASE}/indexing/submit`, {
