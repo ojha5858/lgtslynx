@@ -87,30 +87,18 @@ new Worker(
             "Google Indexing API notified successfully"
           );
         } catch (err) {
-          const msg = err?.message || "";
-          console.log("msg", err)
+          const msg = err?.message || "Unknown Google API error";
 
           if (msg.includes("Permission denied")) {
             await pushLog(
               jobId,
               "warning",
-              msg
-            );
-
-            await pushLog(
-              jobId,
-              "info",
-              "Tip: Verify this site in Google Search Console to enable direct indexing."
+              "Ownership not verified. Falling back to suggestion mode."
             );
 
             pingGSC = false;
           } else {
-            await pushLog(
-              jobId,
-              "error",
-              `Indexing API error: ${msg}`
-            );
-
+            await pushLog(jobId, "error", msg);
             await IndexingJob.updateOne(
               { _id: jobId },
               { $set: { status: "failed" } }
@@ -180,57 +168,37 @@ new Worker(
           );
         }
       }
-      console.log("domain", domain)
+
       const canonicalDomain = domain.replace("://www.", "://");
+      const sitemapUrl = `${canonicalDomain}/sitemap.xml`;
+      let sitemapFound = false;
 
-      console.log("canonicalDomain", canonicalDomain)
+      try {
+        const r = await axios.get(sitemapUrl, {
+          timeout: 8000,
+          validateStatus: (s) => s >= 200 && s < 500,
+        });
 
-      const sitemaps = [
-        `${canonicalDomain}/sitemap.xml`,
-      ];
-      console.log("sitemapCandidates", sitemaps)
-      let sitemapPinged = false;
-
-      for (const sm of sitemaps) {
-        try {
-          const r = await axios.get(sm, {
-            timeout: 8000,
-            maxRedirects: 5,
-            validateStatus: (status) => status >= 200 && status < 500,
-          });
-
-          if (r.status === 200 && typeof r.data === "string") {
-            await pushLog(
-              jobId,
-              "info",
-              `Sitemap detected (Google auto-discovers via GSC): ${sm}`
-            );
-            sitemapPinged = true;
-            break;
-          }
-          else {
-            await pushLog(
-              jobId,
-              "warning",
-              `Sitemap check failed (${r.status}): ${sm}`
-            );
-          }
-        } catch (err) {
-          console.log(err)
+        if (r.status === 200 && typeof r.data === "string") {
+          await pushLog(
+            jobId,
+            "info",
+            `Sitemap detected (auto-discovered by Google): ${sitemapUrl}`
+          );
+          sitemapFound = true;
+        } else {
           await pushLog(
             jobId,
             "warning",
-            `Sitemap fetch error: ${sm} (${err?.message || "unknown"})`
+            `Sitemap check failed (${r.status})`
           );
         }
+      } catch {
+        await pushLog(jobId, "info", "Sitemap not accessible");
       }
 
-      if (!sitemapPinged) {
-        await pushLog(
-          jobId,
-          "info",
-          "No valid sitemap found on canonical domain"
-        );
+      if (!sitemapFound) {
+        await pushLog(jobId, "info", "No valid sitemap detected");
       }
 
 
