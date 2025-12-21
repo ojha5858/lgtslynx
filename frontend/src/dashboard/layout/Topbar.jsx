@@ -1,6 +1,13 @@
-import { FaBell, FaSearch } from "react-icons/fa";
+import { useState } from "react";
+import { FaBell, FaSearch, FaSignOutAlt, FaUser } from "react-icons/fa";
 
 export default function Topbar({ title, user }) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    window.open("http://localhost:5000/auth/logout", "_self");
+  };
+
   return (
     <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40">
 
@@ -21,64 +28,70 @@ export default function Topbar({ title, user }) {
           />
         </div>
 
-        <button
-          className="
-            hidden sm:block
-            text-sm px-4 py-2 rounded-xl border border-slate-200
-            text-slate-600 hover:bg-slate-50 hover:text-slate-900
-            transition-colors font-medium
-          "
-        >
+        <button className="hidden sm:block text-sm px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors font-medium">
           Docs
         </button>
 
-        <button
-          aria-label="Notifications"
-          className="
-            relative p-2.5 rounded-xl
-            text-slate-500 hover:bg-slate-100 hover:text-accent
-            transition-all
-          "
-        >
+        <button className="relative p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-accent transition-all">
           <FaBell size={18} />
           <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
         </button>
 
-        <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-
-          {user && (
-            <div className="hidden md:block text-right">
-              <p className="text-sm font-bold text-slate-700 leading-tight">
-                {user.displayName}
-              </p>
-              <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">
-                Admin
-              </p>
-            </div>
-          )}
-
-          <div
-            className="
-              w-10 h-10 rounded-full
-              bg-gradient-to-br from-accent to-yellow-400
-              p-[2px] cursor-pointer shadow-sm hover:shadow-md transition-shadow
-            "
+        <div className="relative pl-4 border-l border-slate-200">
+          
+          <div 
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-              {user && user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.displayName}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span className="font-bold text-accent text-sm">
-                  {user?.displayName ? user.displayName.charAt(0).toUpperCase() : "U"}
-                </span>
-              )}
+            {user && (
+              <div className="hidden md:block text-right">
+                <p className="text-sm font-bold text-slate-700 leading-tight">
+                  {user.displayName || "User"}
+                </p>
+                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">
+                  Admin
+                </p>
+              </div>
+            )}
+
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-yellow-400 p-[2px] shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                {user?.image ? (
+                  <img
+                    src={user.image}
+                    alt="User"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="font-bold text-accent text-sm">
+                    {user?.displayName ? user.displayName.charAt(0).toUpperCase() : "U"}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+
+          {isDropdownOpen && (
+            <div className="absolute right-0 top-14 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 animate-in fade-in slide-in-from-top-2">
+              <div className="px-4 py-2 border-b border-slate-50 md:hidden">
+                <p className="text-sm font-bold text-slate-800">{user?.displayName}</p>
+                <p className="text-xs text-slate-500">{user?.email}</p>
+              </div>
+              
+              <button className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                <FaUser size={14} /> Profile
+              </button>
+              
+              <button 
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+              >
+                <FaSignOutAlt size={14} /> Logout
+              </button>
+            </div>
+          )}
+        
         </div>
       </div>
     </header>

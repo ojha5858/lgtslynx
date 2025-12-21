@@ -4,13 +4,15 @@ import DashboardHome from "./views/DashboardHome";
 import IndexingView from "./views/IndexingView";
 import ContentView from "./views/ContentView";
 import ToolsView from "./views/ToolsView";
+import SerpPreviewTool from "./views/SerpPreviewTool";
+import SettingsView from "./views/SettingsView";
 
 const pageTitles = {
   dashboard: "Overview",
   indexing: "Indexing",
-  content: "Content",
-  tools: "Tools",
-  search: "Search",
+  content: "Content Strategy",
+  tools: "SEO Tools Suite",
+  serp: "SERP Preview",
 };
 
 export default function SEOPlatform({ user }) {
@@ -41,6 +43,8 @@ export default function SEOPlatform({ user }) {
         {activeTab === "indexing" && <IndexingView />}
         {activeTab === "content" && <ContentView />}
         {activeTab === "tools" && <ToolsView />}
+        {activeTab === "serp" && <SerpPreviewTool />}
+        {activeTab === "settings" && <SettingsView />}
       </div>
     </DashboardLayout>
   );

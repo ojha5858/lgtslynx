@@ -4,6 +4,8 @@ import {
   FaBolt,
   FaBrain,
   FaTools,
+  FaGoogle,
+  FaCogs,
 } from "react-icons/fa";
 
 export default function Sidebar({ active, setActive }) {
@@ -11,7 +13,9 @@ export default function Sidebar({ active, setActive }) {
     { id: "dashboard", label: "Overview", icon: FaHome },
     { id: "indexing", label: "Indexing", icon: FaBolt },
     { id: "content", label: "Content", icon: FaBrain },
+    { id: "serp", label: "SERP", icon: FaGoogle },
     { id: "tools", label: "Tools", icon: FaTools },
+    { id: "settings", label: "Settings", icon: FaCogs },
   ];
 
   return (
