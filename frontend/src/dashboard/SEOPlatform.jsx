@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "./layout/DashboardLayout";
 import DashboardHome from "./views/DashboardHome";
 import IndexingView from "./views/IndexingView";
@@ -13,20 +13,34 @@ const pageTitles = {
   search: "Search",
 };
 
-export default function SEOPlatform() {
-  const [active, setActive] = useState("dashboard");
+export default function SEOPlatform({ user }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentPath = location.pathname.replace("/", "");
+
+  const activeTab = currentPath === "overview" ? "dashboard" : currentPath;
+
+  const handleTabChange = (tabName) => {
+    if (tabName === "dashboard") {
+      navigate("/overview");
+    } else {
+      navigate(`/${tabName}`);
+    }
+  };
 
   return (
     <DashboardLayout
-      active={active}
-      setActive={setActive}
-      title={pageTitles[active]}
+      user={user}
+      active={activeTab}
+      setActive={handleTabChange}
+      title={pageTitles[activeTab] || "Overview"}
     >
       <div className="text-slate-600">
-        {active === "dashboard" && <DashboardHome />}
-        {active === "indexing" && <IndexingView />}
-        {active === "content" && <ContentView />}
-        {active === "tools" && <ToolsView />}
+        {activeTab === "dashboard" && <DashboardHome />}
+        {activeTab === "indexing" && <IndexingView />}
+        {activeTab === "content" && <ContentView />}
+        {activeTab === "tools" && <ToolsView />}
       </div>
     </DashboardLayout>
   );

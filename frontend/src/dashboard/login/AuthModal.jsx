@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaGoogle, FaTimes } from "react-icons/fa";
 
-export default function AuthModal({ isOpen, onClose }) {
+export default function AuthModal({ isOpen, onClose, onGoogleLogin }) {
   const [isLogin, setIsLogin] = useState(true);
 
   if (!isOpen) return null;
@@ -9,9 +9,8 @@ export default function AuthModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative border border-slate-100">
-        
-        {/* Close Button */}
-        <button 
+
+        <button
           onClick={onClose}
           type="button"
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-2"
@@ -27,7 +26,14 @@ export default function AuthModal({ isOpen, onClose }) {
             {isLogin ? "Enter your details to login" : "Join us to build authority"}
           </p>
 
-          <button className="w-full flex items-center justify-center gap-3 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition-all font-medium mb-6 text-slate-700">
+          <button
+            type="button"
+            onClick={() => {
+              console.log("Button Clicked inside Modal");
+              onGoogleLogin();
+            }}
+            className="w-full flex items-center justify-center gap-3 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition-all font-medium mb-6 text-slate-700 cursor-pointer"
+          >
             <FaGoogle className="text-red-500" />
             Continue with Google
           </button>
@@ -47,7 +53,7 @@ export default function AuthModal({ isOpen, onClose }) {
             )}
             <input type="email" placeholder="Email Address" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-accent outline-none" />
             <input type="password" placeholder="Password" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-accent outline-none" />
-            
+
             <button className="w-full bg-accent text-black font-bold py-3 rounded-xl hover:opacity-90 transition-opacity shadow-lg">
               {isLogin ? "Login" : "Sign Up"}
             </button>
@@ -55,7 +61,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
           <p className="mt-8 text-center text-slate-600 text-sm">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button 
+            <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
               className="text-accent font-bold hover:underline"

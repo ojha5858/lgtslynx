@@ -1,3 +1,4 @@
+import React from "react";
 import {
   FaHome,
   FaBolt,
@@ -17,20 +18,21 @@ export default function Sidebar({ active, setActive }) {
     <aside
       className="
         bg-white
-        border-t md:border-t-0 md:border-r
+        border-t md:border-t-0 md:border-r border-slate-200
         fixed md:static
         bottom-0 left-0 right-0
         h-16 md:h-screen md:w-64
         flex md:flex-col
-        z-40
+        z-50
       "
     >
-      <div className="hidden md:block px-5 py-6 border-b border-slate-200">
-        <h2 className="text-xl font-bold tracking-wide text-slate-800">
-          LGTS <span className="italic text-accent">Lynx</span>
+      {/* Logo Area (Hidden on Mobile) */}
+      <div className="hidden md:block px-6 py-6 border-b border-slate-100">
+        <h2 className="text-xl font-bold tracking-wide text-slate-800 flex items-center gap-2">
+           LGTS <span className="italic text-accent">Lynx</span>
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Search & Indexing Platform
+        <p className="text-xs text-slate-400 mt-1 font-medium">
+          SEO Automation Platform
         </p>
       </div>
 
@@ -40,7 +42,7 @@ export default function Sidebar({ active, setActive }) {
           justify-around md:justify-start
           items-center md:items-stretch
           px-2 md:px-4
-          py-1 md:py-4
+          py-1 md:py-6
           md:space-y-1
         "
       >
@@ -57,21 +59,21 @@ export default function Sidebar({ active, setActive }) {
                 items-center gap-1 md:gap-3
                 flex-1 md:flex-none
                 w-full
-                text-xs md:text-sm
+                text-[10px] md:text-sm font-medium
                 px-2 md:px-4
-                py-1.5 md:py-2
-                rounded-md
-                transition-all duration-150
+                py-2 md:py-3
+                rounded-xl
+                transition-all duration-200
                 ${
                   isActive
-                    ? "text-accent bg-accent/10 font-semibold"
-                    : "text-slate-600 hover:bg-slate-100"
+                    ? "text-accent bg-accent/5 shadow-sm ring-1 ring-accent/20"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                 }
               `}
             >
               <Icon
-                size={18}
-                className={isActive ? "text-accent" : "text-slate-500"}
+                size={isActive ? 20 : 18}
+                className={`transition-colors ${isActive ? "text-accent" : "text-slate-400"}`}
               />
               <span>{item.label}</span>
             </button>
@@ -79,21 +81,25 @@ export default function Sidebar({ active, setActive }) {
         })}
       </nav>
 
+      {/* Pro Plan Card (Hidden on Mobile) */}
       <div className="hidden md:block p-4 border-t border-slate-100">
-        <div className="rounded-lg p-4 bg-accent text-white">
-          <p className="text-xs font-medium opacity-90 mb-1">
-            Pro Plan
+        <div className="rounded-2xl p-5 bg-slate-900 text-white relative overflow-hidden group">
+          {/* Decorative Circle */}
+          <div className="absolute -top-6 -right-6 w-16 h-16 bg-accent/20 rounded-full group-hover:bg-accent/30 transition-colors blur-xl"></div>
+          
+          <p className="text-xs font-medium text-slate-300 mb-1">
+            Pro Plan Active
           </p>
-          <p className="text-sm font-bold">
+          <p className="text-lg font-bold mb-3">
             12 Days Left
           </p>
 
           <button
             className="
-              w-full mt-3 bg-white text-accent
-              text-xs py-1.5 rounded
-              hover:bg-slate-100 transition-colors
-              font-semibold
+              w-full bg-accent text-black
+              text-xs py-2 rounded-lg
+              hover:bg-white hover:text-accent transition-all
+              font-bold shadow-lg shadow-accent/20
             "
           >
             Upgrade Now

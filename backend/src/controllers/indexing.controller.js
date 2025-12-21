@@ -22,6 +22,7 @@ const submitIndexingJob = async (req, res, next) => {
     url = normalizeUrl(url);
 
     const job = await IndexingJob.create({
+      user: req.user ? req.user._id : null,
       url,
       options: { pingGSC, updateSitemap },
     });

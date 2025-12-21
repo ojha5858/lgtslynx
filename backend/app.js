@@ -14,7 +14,7 @@ app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://vigilant-journey-65q46wx54qhwpv-5173.app.github.dev", 
+    origin: "http://localhost:5173", 
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -28,8 +28,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-      secure: true,
-      sameSite: 'none',
+      secure: false,
+      sameSite: 'lax', 
       maxAge: 24 * 60 * 60 * 1000
   }
 }));
