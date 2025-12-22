@@ -27,9 +27,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'super_secret_key',
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
-    secure: false,
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
