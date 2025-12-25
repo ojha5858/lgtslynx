@@ -5,9 +5,10 @@ const userSchema = new mongoose.Schema({
     email: { type: String, unique: true },
     displayName: String,
     image: String,
+    verifiedSites: { type: [String], default: [] },
     provider: { type: String, default: "google" },
     createdAt: { type: Date, default: Date.now },
-}, { timestmaps: true }
+}, { timestamps: true }
 );
 
 module.exports = mongoose.model("User", userSchema);

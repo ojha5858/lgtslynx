@@ -13,7 +13,10 @@ try {
 
 const auth = new google.auth.GoogleAuth({
   credentials,
-  scopes: ["https://www.googleapis.com/auth/indexing"],
+  scopes: [
+    "https://www.googleapis.com/auth/indexing",
+    "https://www.googleapis.com/auth/webmasters.readonly",
+  ],
 });
 
 const indexingClient = google.indexing({
@@ -21,4 +24,4 @@ const indexingClient = google.indexing({
   auth,
 });
 
-module.exports = { indexingClient };
+module.exports = { indexingClient, auth };

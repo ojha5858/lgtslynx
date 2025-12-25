@@ -1,9 +1,13 @@
 const fs = require("fs");
 const csv = require("csv-parser");
+const { Parser } = require("json2csv");
+const { google } = require("googleapis");
+
 const IndexingJob = require("../models/IndexingJob");
+const User = require("../models/User");
 const { indexingQueue } = require("../queues/indexing.queue");
 const { logger } = require("../utils/logger");
-const User = require("../models/User")
+const { auth } = require("../config/googleAuth");
 
 const normalizeUrl = (url) => {
   if (!url) return null;
@@ -136,6 +140,7 @@ const normalizeLogs = (logs = []) => {
   });
 };
 
+// --- 3. GET SINGLE LOGS ---
 const getIndexingLogs = async (req, res, next) => {
   try {
     const job = await IndexingJob.findById(req.params.jobId).lean();
@@ -170,10 +175,12 @@ const getRecentIndexingJobs = async (req, res, next) => {
     const jobs = await IndexingJob.find({ user: userId })
       .sort({ createdAt: -1 })
       .limit(10)
-      .lean()
+      .lean();
+
     res.json({
       success: true,
       jobs: jobs.map((job) => ({
+        _id: job._id,
         jobId: job._id,
         url: job.url,
         status: job.status,
@@ -234,9 +241,95 @@ const getDashboardStats = async (req, res, next) => {
   }
 };
 
+const exportJobsCsv = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const jobs = await IndexingJob.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .select("url status options createdAt")
+      .lean();
+
+    if (!jobs.length) {
+      return res.status(404).json({ success: false, message: "No jobs found to export" });
+    }
+
+    const fields = [
+      { label: "Page URL", value: "url" },
+      { label: "Status", value: "status" },
+      { label: "Submission Date", value: (row) => new Date(row.createdAt).toLocaleString() },
+      { label: "GSC Pinged", value: (row) => row.options?.pingGSC ? "Yes" : "No" }
+    ];
+
+    const json2csvParser = new Parser({ fields });
+    const csvData = json2csvParser.parse(jobs);
+
+    res.header("Content-Type", "text/csv");
+    res.attachment(`indexing-report-${Date.now()}.csv`);
+
+    return res.send(csvData);
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+const checkServiceAccountAccess = async (req, res, next) => {
+  try {
+    const webmasters = google.webmasters({
+      version: "v3",
+      auth: auth,
+    });
+
+    const response = await webmasters.sites.list();
+    const sites = response.data.siteEntry || [];
+
+    const verifiedSites = sites
+      .filter(site => site.permissionLevel === "siteOwner")
+      .map(site => site.siteUrl);
+
+    if (verifiedSites.length > 0 && req.user && req.user._id) {
+        await User.findByIdAndUpdate(req.user._id, { 
+            verifiedSites: verifiedSites 
+        });
+    }
+
+    res.status(200).json({
+      success: true,
+      sites: verifiedSites
+    });
+
+  } catch (err) {
+    console.error("Verification Error:", err.message);
+    res.status(200).json({
+      success: false,
+      message: "Failed to connect to Google API",
+      sites: []
+    });
+  }
+};
+
+const getSavedStatus = async (req, res) => {
+    try {
+      if (!req.user || !req.user._id) {
+        return res.json({ success: false, sites: [] });
+      }
+      
+      const user = await User.findById(req.user._id).select("verifiedSites");
+      res.json({ 
+        success: user.verifiedSites && user.verifiedSites.length > 0, 
+        sites: user.verifiedSites || [] 
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Error fetching status" });
+    }
+};
 module.exports = {
   submitIndexingJob,
   getIndexingLogs,
   getRecentIndexingJobs,
   getDashboardStats,
+  exportJobsCsv,
+  checkServiceAccountAccess,
+  getSavedStatus,
 };

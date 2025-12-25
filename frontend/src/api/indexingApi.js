@@ -92,3 +92,55 @@ export const getDashboardData = async () => {
     throw error;
   }
 };
+
+export const verifyGscConnection = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/indexing/verify-access`, { 
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to verify connection");
+    }
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getSavedConnectionStatus = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/indexing/status`, {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error("Failed to fetch status");
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    return { success: false, sites: [] };
+  }
+};
+
+export const downloadReport = async () => {
+  const res = await fetch(`${API_BASE}/indexing/export`, {
+    method: "GET",
+    credentials: "include",
+  });
+  
+  if (!res.ok) throw new Error("Failed to download report");
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Lynx-Report-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
