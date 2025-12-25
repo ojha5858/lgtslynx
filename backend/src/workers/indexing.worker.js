@@ -241,5 +241,5 @@ new Worker(
       throw err;
     }
   },
-  { connection: redis }
+  { connection: redis, concurrency: 5 }
 );
