@@ -6,23 +6,23 @@ export default function DashboardLayout({
   setActive,
   title,
   children,
-  user, 
+  user,
 }) {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      <div
-        className="
-          fixed bottom-0 left-0 right-0 z-40
-          md:static md:inset-y-0 md:w-64
-        "
-      >
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+      
+      <div className="hidden md:flex md:w-64 md:flex-col border-r border-slate-200 bg-white">
         <Sidebar active={active} setActive={setActive} />
       </div>
 
-      <div className="flex-1 flex flex-col min-h-screen pb-16 md:pb-0">
+      <div className="md:hidden">
+         <Sidebar active={active} setActive={setActive} />
+      </div>
+
+      <div className="flex flex-col flex-1 min-w-0">
         <Topbar title={title} user={user} />
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
           {children}
         </main>
       </div>
