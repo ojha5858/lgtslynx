@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import Card from "../components/Card";
-import { FaBolt, FaLink, FaFileUpload, FaCoins , FaPlusCircle} from "react-icons/fa";
+import { 
+  FaLink, 
+  FaCloudUploadAlt,
+  FaPaperPlane,
+  FaSyncAlt,
+  FaWallet,
+  FaTerminal
+} from "react-icons/fa";
 import {
   submitIndexingJob,
   fetchIndexingLogs,
@@ -19,6 +26,13 @@ export default function IndexingView() {
   const [credits, setCredits] = useState(null);
 
   const pollRef = useRef(null);
+  const logsEndRef = useRef(null);
+
+  useEffect(() => {
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [logs]);
 
   useEffect(() => {
     loadCredits();
@@ -44,7 +58,7 @@ export default function IndexingView() {
 
   const handleSubmit = async () => {
     if (!url.trim() && !file) {
-      pushLog("error", "Please provide a URL or upload a CSV file");
+      pushLog("error", "URL or CSV file is required to start.");
       return;
     }
 
@@ -52,6 +66,8 @@ export default function IndexingView() {
     setLoading(true);
 
     try {
+      pushLog("info", "Establishing secure connection to indexing node...");
+      
       const res = await submitIndexingJob({
         url,
         file,
@@ -59,29 +75,27 @@ export default function IndexingView() {
         updateSitemap,
       });
 
-      if (res.creditsLeft !== undefined) {
-        setCredits(res.creditsLeft);
-      }
+      if (res.creditsLeft !== undefined) setCredits(res.creditsLeft);
 
       if (res.mode === "bulk") {
-        pushLog("info", `Bulk Process Started. Cost: ${res.count} Credits.`);
-
-        if (res.submittedUrls && res.submittedUrls.length > 0) {
+        pushLog("info", `Batch request received. Processing ${res.count} URLs.`);
+        
+        if (res.submittedUrls?.length > 0) {
           res.submittedUrls.forEach((subUrl, index) => {
             setTimeout(() => {
-              pushLog("success", `[QUEUED] ${subUrl}`);
-            }, index * 150);
+              pushLog("success", `Authorized: ${subUrl}`);
+            }, index * 50);
           });
-
+          
           setTimeout(() => {
-            pushLog("warning", "All URLs sent to background processor.");
-            pushLog("info", "Check 'Recent Activity' on Dashboard for results.");
-            setLoading(false);
-            setFile(null);
-            document.getElementById('csvInput').value = "";
-          }, res.submittedUrls.length * 150 + 800);
+             pushLog("success", "Handover to worker complete.");
+             setLoading(false);
+             setFile(null);
+             const fileInput = document.getElementById('file-upload');
+             if(fileInput) fileInput.value = "";
+          }, res.submittedUrls.length * 50 + 500);
         } else {
-          setLoading(false);
+            setLoading(false);
         }
         return;
       }
@@ -91,12 +105,7 @@ export default function IndexingView() {
         const logRes = await fetchIndexingLogs(jobId);
         setLogs(logRes.logs || []);
 
-        if (
-          logRes.status === "submitted" ||
-          logRes.status === "signals_sent" ||
-          logRes.status === "failed" ||
-          logRes.status === "done"
-        ) {
+        if (["submitted", "signals_sent", "failed", "done"].includes(logRes.status)) {
           clearInterval(pollRef.current);
           setLoading(false);
           setUrl("");
@@ -104,11 +113,7 @@ export default function IndexingView() {
       }, 1500);
 
     } catch (err) {
-      if (err.message && err.message.includes("Insufficient credits")) {
-        pushLog("error", "INSUFFICIENT CREDITS! Please recharge.");
-      } else {
-        pushLog("error", err.message || "Something went wrong");
-      }
+      pushLog("error", err.message || "Protocol error: Connection timed out.");
       setLoading(false);
     }
   };
@@ -118,7 +123,7 @@ export default function IndexingView() {
       setLoading(true);
       const res = await refillCredits();
       setCredits(res.credits);
-      pushLog("success", "💰 Account recharged with 50 Free Credits!");
+      pushLog("success", "Credits sync complete.");
     } catch (err) {
       pushLog("error", err.message);
     } finally {
@@ -127,144 +132,142 @@ export default function IndexingView() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2">
-          <FaBolt className="text-accent" />
-          Fast Indexing Module
-        </h1>
-        <p className="text-slate-500 mt-1">
-          Trigger indexing signals & monitor server output
-        </p>
+    <div className="max-w-6xl mx-auto pb-8 px-4">
+      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">Indexing Control Center</h1>
+            <p className="text-slate-500 text-[11px] uppercase font-bold tracking-widest">v2.4.0 Live Monitor</p>
+        </div>
+        
+        <div className="bg-slate-900 px-4 py-2 rounded-xl shadow-lg flex items-center gap-4 border border-slate-700">
+            <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Credits</span>
+                <span className="text-lg font-bold text-accent font-mono leading-none">{credits !== null ? credits : "000"}</span>
+            </div>
+            <button onClick={handleRefill} className="bg-accent/10 hover:bg-accent/20 text-accent p-2 rounded-lg transition-all">
+                <FaWallet size={16} />
+            </button>
+        </div>
       </div>
 
-      <Card className="p-8">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-          <div>
-            <label className="block text-sm font-medium text-slate-600 mb-2">
-              Target URL
-            </label>
+        <div className="lg:col-span-5 h-full">
+            <Card className="p-6 space-y-5 bg-white border border-slate-200 shadow-sm flex flex-col">
+                <div>
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2 block">Target URL</label>
+                    <div className="relative">
+                        <FaLink className="absolute left-3 top-3.5 text-slate-400 size-3.5" />
+                        <input 
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            placeholder="https://domain.com/path"
+                            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all outline-none text-slate-700"
+                        />
+                    </div>
+                </div>
 
-            <div className="flex border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-accent/40">
-              <span className="px-3 py-2 bg-slate-100 text-slate-600 text-sm border-r flex items-center gap-2">
-                <FaLink size={12} />
-                https://
-              </span>
+                <div className="relative flex items-center py-1">
+                    <div className="flex-grow border-t border-slate-100"></div>
+                    <span className="flex-shrink-0 mx-4 text-[10px] text-slate-400 font-bold uppercase">or bundle</span>
+                    <div className="flex-grow border-t border-slate-100"></div>
+                </div>
 
-              <input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="example.com/new-page"
-                className="flex-1 px-3 py-2 outline-none text-sm text-slate-700"
-              />
-            </div>
-          </div>
+                <label htmlFor="file-upload" className={`group flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${file ? "border-accent bg-accent/5" : "border-slate-200 hover:border-accent/40 hover:bg-slate-50"}`}>
+                    <FaCloudUploadAlt className={`w-7 h-7 mb-2 ${file ? "text-accent" : "text-slate-400 group-hover:text-accent"}`} />
+                    <p className="text-xs text-slate-600 px-4 text-center truncate w-full font-medium">
+                        {file ? file.name : "Drop dataset (.csv)"}
+                    </p>
+                    <input id="file-upload" type="file" className="hidden" accept=".csv" onChange={(e) => setFile(e.target.files[0])} />
+                </label>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-100"></span></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400 font-bold">OR</span></div>
-          </div>
+                <div className="space-y-3">
+                    <Toggle label="Google Signal Injection" active={pingGSC} onClick={() => setPingGSC(!pingGSC)} />
+                    <Toggle label="Sitemap.xml Sync" active={updateSitemap} onClick={() => setUpdateSitemap(!updateSitemap)} />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-600 mb-2">
-              Bulk Indexing (CSV)
-            </label>
-            <label className="flex items-center justify-center w-full border-2 border-dashed border-slate-200 rounded-lg p-4 cursor-pointer hover:border-accent hover:bg-slate-50 transition-all">
-              <div className="flex flex-col items-center">
-                <FaFileUpload className="text-slate-400 mb-2" size={20} />
-                <span className="text-xs text-slate-500 font-medium">
-                  {file ? file.name : "Click to upload CSV (one URL per row)"}
-                </span>
-              </div>
-              <input
-                id="csvInput"
-                type="file"
-                className="hidden"
-                accept=".csv"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={pingGSC}
-                onChange={() => setPingGSC(!pingGSC)}
-                className="accent-accent"
-              />
-              <span className="text-sm font-medium">Ping Google Search Console</span>
-            </label>
-
-            <label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={updateSitemap}
-                onChange={() => setUpdateSitemap(!updateSitemap)}
-                className="accent-accent"
-              />
-              <span className="text-sm font-medium">Update Sitemap.xml</span>
-            </label>
-          </div>
-          <div className="flex justify-between items-center px-1">
-            <span className="text-xs text-slate-400">Cost: 1 Credit per URL</span>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                <FaCoins className="text-yellow-500" />
-                <span className="text-sm font-bold text-slate-700">
-                  {credits !== null ? credits : "..."}
-                </span>
-              </div>
-
-              <button
-                onClick={handleRefill}
-                title="Get Free Credits"
-                className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 flex items-center gap-1 transition-colors"
-              >
-                <FaPlusCircle /> Free Refill
-              </button>
-            </div>
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all
-              ${loading ? "bg-accent/70 cursor-not-allowed" : "bg-accent hover:bg-accent/90 shadow-lg shadow-accent/20"} text-white`}
-          >
-            <FaBolt className={loading ? "animate-pulse" : ""} />
-            {loading ? "Processing..." : "Instant Submit"}
-          </button>
+                <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className={`w-full py-4 rounded-xl font-bold text-sm text-white shadow-lg transition-all transform active:scale-[0.97] flex items-center justify-center gap-3
+                    ${loading ? "bg-slate-400 cursor-not-allowed" : "bg-accent hover:shadow-accent/30"}`}
+                >
+                    {loading ? <FaSyncAlt className="animate-spin size-4" /> : <FaPaperPlane className="size-4" />}
+                    {loading ? "EXECUTING..." : "START INDEXING"}
+                </button>
+            </Card>
         </div>
-      </Card>
 
-      {logs.length > 0 && (
-        <div className="bg-slate-900 text-slate-200 rounded-xl p-4 font-mono text-sm max-h-80 overflow-y-auto shadow-2xl border border-slate-800">
-          <div className="text-slate-500 mb-3 text-xs border-b border-slate-800 pb-2 flex justify-between">
-            <span>&gt; server-console</span>
-            {loading && <span className="animate-pulse text-accent">● LIVE</span>}
-          </div>
+        <div className="lg:col-span-7 h-full">
+            <div className="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 flex flex-col overflow-hidden h-[490px]">
+                <div className="bg-slate-800/50 px-5 py-3.5 flex justify-between items-center border-b border-slate-800 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="flex gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                           <FaTerminal size={12} /> System Terminal
+                        </span>
+                    </div>
+                    {loading && <span className="text-[10px] font-bold text-accent animate-pulse">● LIVE_AGENT</span>}
+                </div>
 
-          <div className="space-y-1">
-            {logs.map((log, i) => (
-              <div key={i} className="flex gap-3 text-xs md:text-sm animate-fade-in">
-                <span className="text-slate-600 shrink-0 select-none">[{log.time}]</span>
-                <span className={
-                  log.type === "success" ? "text-green-400 font-bold" :
-                    log.type === "warning" ? "text-yellow-400" :
-                      log.type === "error" ? "text-red-400 font-bold" : "text-blue-400"
-                }>
-                  {log.type.toUpperCase()}
-                </span>
-                <span className="break-all">{log.message}</span>
-              </div>
-            ))}
-          </div>
+                <div className="flex-1 overflow-y-auto p-5 font-mono text-[12px] scroll-smooth custom-scrollbar">
+                    {!logs.length ? (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-700">
+                            <FaTerminal size={40} className="mb-4 opacity-10" />
+                            <p className="text-xs uppercase tracking-tighter">Awaiting instruction input...</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {logs.map((log, i) => (
+                                <div key={i} className="flex gap-3 animate-fade-in text-slate-300">
+                                    <span className="text-slate-600 shrink-0 select-none">[{log.time}]</span>
+                                    <span className={`font-bold shrink-0 uppercase text-[11px] ${
+                                        log.type === 'success' ? 'text-green-400' : 
+                                        log.type === 'error' ? 'text-red-400' : 
+                                        log.type === 'warning' ? 'text-yellow-400' : 'text-accent'
+                                    }`}>
+                                        {log.type}:
+                                    </span>
+                                    <span className="leading-relaxed opacity-90 break-words">{log.message}</span>
+                                </div>
+                            ))}
+                            {loading && (
+                                <div className="flex gap-2 text-accent mt-2 items-center">
+                                    <span className="animate-bounce text-lg">_</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-tight opacity-50">Processing...</span>
+                                </div>
+                            )}
+                            <div ref={logsEndRef} />
+                        </div>
+                    )}
+                </div>
+
+                <div className="bg-slate-800/30 px-5 py-2 border-t border-slate-800 flex justify-between items-center shrink-0">
+                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-tighter">Node: primary-in-01</span>
+                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-tighter">Process: UTF-8</span>
+                </div>
+            </div>
         </div>
-      )}
+      </div>
     </div>
   );
+}
+
+function Toggle({ label, active, onClick }) {
+    return (
+        <div className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-all">
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-tight">{label}</span>
+            <button 
+                onClick={onClick}
+                className={`w-10 h-5 flex items-center rounded-full p-1 transition-colors duration-300 ${active ? 'bg-accent' : 'bg-slate-300'}`}
+            >
+                <div className={`bg-white w-3 h-3 rounded-full shadow-sm transform duration-300 ${active ? 'translate-x-5' : ''}`}></div>
+            </button>
+        </div>
+    );
 }
