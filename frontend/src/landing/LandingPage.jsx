@@ -5,6 +5,7 @@ import HowItWorks from "./HowItWorks";
 import Security from "./Security";
 import Pricing from "./Pricing";
 import CTA from "./CTA";
+import Footer from "./Footer";
 
 export default function LandingPage({ onLaunch }) {
   return (
@@ -16,6 +17,7 @@ export default function LandingPage({ onLaunch }) {
       <Security />
       <Pricing />
       <CTA onLaunch={onLaunch} />
+      <Footer />
     </>
   );
 }

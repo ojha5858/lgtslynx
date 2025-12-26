@@ -1,45 +1,28 @@
+import { FaUpload, FaDatabase, FaGoogle, FaCheckDouble } from "react-icons/fa";
+
 export default function HowItWorks() {
   const steps = [
-    {
-      step: "1",
-      title: "Submit Your URL",
-      desc: "User submits a page URL from the dashboard and selects indexing options.",
-    },
-    {
-      step: "2",
-      title: "System Automation",
-      desc: "LGTS Lynx updates sitemaps, pings Search Console and triggers Indexing API.",
-    },
-    {
-      step: "3",
-      title: "Google Discovery",
-      desc: "Google crawlers discover URLs faster with structured indexing signals.",
-    },
-    {
-      step: "4",
-      title: "Track Status",
-      desc: "Indexing status is tracked, logged, retried and monitored automatically.",
-    },
+    { id: "01", title: "Ingestion", icon: <FaUpload />, color: "from-blue-500 to-cyan-500", log: "$ GET /urls.csv" },
+    { id: "02", title: "Processing", icon: <FaDatabase />, color: "from-amber-500 to-orange-500", log: "SYNC: 100%" },
+    { id: "03", title: "Injection", icon: <FaGoogle />, color: "from-red-500 to-pink-500", log: "API: SUCCESS" },
+    { id: "04", title: "Indexing", icon: <FaCheckDouble />, color: "from-green-500 to-emerald-500", log: "CONFIRMED" },
   ];
 
   return (
-    <section className="py-24 bg-dark">
+    <section id="how-it-works" className="py-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-4xl font-bold text-center mb-16">
-          How LGTS Lynx Works
-        </h2>
-
-        <div className="grid md:grid-cols-4 gap-8">
-          {steps.map((s) => (
-            <div
-              key={s.step}
-              className="bg-white/5 border border-white/10 rounded-xl p-6"
-            >
-              <div className="text-accent text-3xl font-bold mb-3">
-                {s.step}
+        <div className="mb-16 text-center">
+          <span className="text-accent font-black text-[10px] uppercase tracking-[0.3em] mb-2 block">The Workflow</span>
+          <h2 className="text-4xl font-black text-slate-900 tracking-tighter leading-none">How LGTS Lynx <span className="text-slate-400">Forces Results.</span></h2>
+        </div>
+        <div className="grid md:grid-cols-4 gap-6">
+          {steps.map((s, idx) => (
+            <div key={idx} className="bg-white p-8 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all group">
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${s.color} text-white flex items-center justify-center text-xl mb-6`}>{s.icon}</div>
+              <h3 className="text-lg font-black text-slate-800 mb-2 uppercase">{s.title}</h3>
+              <div className="mt-4 p-3 bg-slate-900 rounded-xl font-mono text-[9px] text-slate-400 border border-transparent group-hover:border-accent/50 transition-colors">
+                <span className="text-accent">&gt;</span> {s.log}
               </div>
-              <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
-              <p className="text-sm text-slate-300">{s.desc}</p>
             </div>
           ))}
         </div>
