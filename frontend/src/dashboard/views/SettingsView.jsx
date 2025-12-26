@@ -6,7 +6,10 @@ import {
     FaGoogle,
     FaShieldAlt,
     FaExclamationTriangle,
-    FaGlobe
+    FaGlobe,
+    FaLink,
+    FaUserPlus,
+    FaKey
 } from "react-icons/fa";
 import { verifyGscConnection, getSavedConnectionStatus } from "../../api/indexingApi";
 
@@ -50,8 +53,8 @@ export default function SettingsView() {
         setVerifying(true);
         setStatus("pending");
         try {
-            const data = await verifyGscConnection(targetDomain);
-            if (data.success && data.sites.length > 0) {
+            const data = await verifyGscConnection(targetDomain.trim());
+            if (data.success && data.sites && data.sites.length > 0) {
                 setStatus("success");
                 setVerifiedDomains(data.sites);
             } else {
@@ -64,59 +67,62 @@ export default function SettingsView() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center text-lg text-slate-500 animate-pulse">Checking status...</div>;
+    if (loading) return <div className="p-10 text-center text-lg text-slate-500 animate-pulse font-medium">Synchronizing with GSC...</div>;
 
     return (
-        <div className="max-w-6xl mx-auto pb-12 px-4 sm:px-6">
+        <div className="max-w-8xl mx-auto pb-12 px-4 sm:px-6">
+            
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-800">Project Settings</h1>
-                <p className="text-base text-slate-500 mt-2">Connect Google Search Console to enable Bulk Indexing.</p>
+                <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Project Settings</h1>
+                <p className="text-base text-slate-500 mt-1">Configure your Google Search Console connection for automated indexing.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-                <Card className="lg:col-span-2 p-6 sm:p-8">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
+                <Card className="lg:col-span-2 p-6 sm:p-8 bg-white border-slate-200 shadow-sm">
+                    
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 mb-10 border-b border-slate-50 pb-8">
                         <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shrink-0 border border-accent/20">
                                 <FaGoogle size={28} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-slate-800">Google Indexing API</h2>
-                                <p className="text-sm text-slate-500 font-medium">Service Account Connection</p>
+                                <h2 className="text-xl font-bold text-slate-800 leading-tight">Google Indexing API</h2>
+                                <p className="text-sm text-slate-500 font-medium">Service Account Integration</p>
                             </div>
                         </div>
-                        <div className="ml-auto mt-2 sm:mt-0">
+                        
+                        <div className="shrink-0">
                             {status === "success" ? (
-                                <span className="bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2">
-                                    <FaCheckCircle /> Connected
-                                </span>
+                                <div className="bg-green-50 text-green-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 border border-green-100 shadow-sm">
+                                    <FaCheckCircle className="animate-pulse" /> Connection Verified
+                                </div>
                             ) : (
-                                <span className="bg-yellow-100 text-yellow-700 px-4 py-1.5 rounded-full text-sm font-bold">
-                                    Not Connected
-                                </span>
+                                <div className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-sm font-bold border border-slate-200">
+                                    Status: Not Connected
+                                </div>
                             )}
                         </div>
                     </div>
 
                     {status === "error" && (
-                        <div className="mb-6 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl flex gap-3 text-base">
-                            <FaExclamationTriangle className="mt-1 shrink-0" />
-                            <div>
-                                <p className="font-bold">Verification Failed.</p>
-                                <p className="mt-1 text-sm">Check if email is Owner in GSC & URL is correct.</p>
+                        <div className="mb-8 bg-red-50 border border-red-100 text-red-700 p-5 rounded-2xl flex gap-4 animate-fade-in shadow-sm">
+                            <FaExclamationTriangle className="mt-1 shrink-0 text-xl" />
+                            <div className="text-sm">
+                                <p className="font-bold text-base mb-1">Handshake Failed</p>
+                                <p className="opacity-90 leading-relaxed">Please ensure the service email has been added as an <b>Owner</b> in GSC and the URL format matches your property exactly.</p>
                             </div>
                         </div>
                     )}
 
                     {status === "success" && (
-                        <div className="mb-6 bg-green-50 border border-green-100 p-4 rounded-xl">
-                            <span className="text-base text-green-800 font-bold flex items-center gap-2 mb-2">
-                                <FaGlobe /> Verified Domains:
-                            </span>
+                        <div className="mb-8 bg-accent/5 border border-accent/20 p-5 rounded-2xl shadow-sm">
+                            <div className="flex items-center gap-2 mb-3 text-accent font-bold text-sm uppercase tracking-wider">
+                                <FaGlobe /> Authorized Domains
+                            </div>
                             <div className="flex flex-wrap gap-2">
                                 {verifiedDomains.map((domain, i) => (
-                                    <span key={i} className="text-sm font-mono text-green-700 bg-white px-3 py-1 rounded border border-green-200 shadow-sm">
+                                    <span key={i} className="text-xs font-mono font-bold text-slate-700 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
                                         {domain}
                                     </span>
                                 ))}
@@ -124,73 +130,108 @@ export default function SettingsView() {
                         </div>
                     )}
 
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         
-                        <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50">
-                            <div className="flex justify-between items-center mb-3">
-                                <h3 className="font-semibold text-slate-800 text-base">Step 1: Copy Service Email</h3>
+                        <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-white text-xs font-bold shadow-sm shadow-accent/40">1</span>
+                                <h3 className="font-bold text-slate-800 text-base">Copy Identity Credentials</h3>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <code className="flex-1 bg-white border border-slate-300 rounded-lg px-4 py-3 text-sm text-slate-700 font-mono break-all flex items-center shadow-sm">
-                                    {SERVICE_EMAIL}
-                                </code>
+                                <div className="flex-1 relative group">
+                                    <code className="block w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-600 font-mono break-all pr-10 shadow-inner">
+                                        {SERVICE_EMAIL}
+                                    </code>
+                                    <FaKey className="absolute right-4 top-4 text-slate-300 group-hover:text-accent transition-colors" />
+                                </div>
                                 <button
                                     onClick={copyToClipboard}
-                                    className={`px-6 py-3 rounded-lg text-sm font-bold transition-all whitespace-nowrap shadow-sm ${copied ? "bg-green-500 text-white" : "bg-slate-800 text-white hover:bg-slate-700"}`}
+                                    className={`px-8 py-3.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md ${
+                                        copied ? "bg-green-500 text-white" : "bg-slate-800 text-white hover:bg-slate-700 active:scale-95"
+                                    }`}
                                 >
-                                    {copied ? "Copied!" : "Copy Email"}
+                                    {copied ? <><FaCheckCircle /> Copied</> : <><FaCopy /> Copy Email</>}
                                 </button>
                             </div>
                         </div>
 
-                        <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50">
-                            <h3 className="font-semibold text-slate-800 text-base mb-3">Step 2: Add to Google Search Console</h3>
-                            <ol className="list-decimal list-inside text-sm text-slate-600 space-y-2 ml-1 leading-relaxed">
-                                <li>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="text-blue-600 font-medium hover:underline">Google Search Console</a>.</li>
-                                <li>Select property &gt; Go to <strong>Settings</strong> &gt; <strong>Users and permissions</strong>.</li>
-                                <li>Click <strong>Add User</strong> &gt; Paste the email &gt; Select <strong>Owner</strong> permission.</li>
-                            </ol>
+                        <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-white text-xs font-bold shadow-sm shadow-accent/40">2</span>
+                                <h3 className="font-bold text-slate-800 text-base">Assign Permissions</h3>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-5 items-start">
+                                <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm shrink-0 hidden sm:block">
+                                    <FaUserPlus className="text-accent text-3xl" />
+                                </div>
+                                <ol className="list-decimal list-outside text-sm text-slate-600 space-y-3 ml-4 leading-relaxed font-medium">
+                                    <li>Access <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="text-accent font-bold hover:underline decoration-accent/30 underline-offset-4">Google Search Console</a>.</li>
+                                    <li>Navigate to <b>Settings</b> &gt; <b>Users and permissions</b>.</li>
+                                    <li>Select <b>Add User</b>, paste the email, and choose <b>Owner</b> permission.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <div className="pt-2">
-                            <label className="block text-base font-semibold text-slate-800 mb-3">Step 3: Enter Domain & Verify</label>
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-white text-xs font-bold shadow-sm shadow-accent/40">3</span>
+                                <h3 className="font-bold text-slate-800 text-base">Final Verification</h3>
+                            </div>
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <input
-                                    type="text"
-                                    value={targetDomain}
-                                    onChange={(e) => setTargetDomain(e.target.value)}
-                                    placeholder="https://site.com OR sc-domain:site.com"
-                                    className="w-full sm:flex-1 border border-slate-300 rounded-lg px-5 py-3 text-base text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
-                                />
+                                <div className="flex-1 relative">
+                                    <FaLink className="absolute left-4 top-4 text-slate-300" />
+                                    <input
+                                        type="text"
+                                        value={targetDomain}
+                                        onChange={(e) => setTargetDomain(e.target.value)}
+                                        placeholder="https://mysite.com OR sc-domain:site.com"
+                                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-4 focus:ring-accent/10 focus:border-accent transition-all outline-none shadow-sm placeholder:text-slate-400 font-medium"
+                                        onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+                                    />
+                                </div>
                                 <button
                                     onClick={handleVerify}
                                     disabled={verifying}
-                                    className={`w-full sm:w-auto px-8 py-3 rounded-lg font-bold text-base text-white transition-all whitespace-nowrap shadow-md ${
-                                        verifying ? "bg-blue-400 cursor-wait" : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:scale-95"
+                                    className={`px-10 py-3.5 rounded-xl font-bold text-sm text-white transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 ${
+                                        verifying ? "bg-slate-400 cursor-not-allowed" : "bg-accent/90 hover:bg-accent hover:shadow-accent/30"
                                     }`}
                                 >
-                                    {verifying ? "Verifying..." : "Verify Now"}
+                                    {verifying ? (
+                                        <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Validating...</>
+                                    ) : "Verify Now"}
                                 </button>
                             </div>
-                            <p className="text-xs text-slate-500 mt-2 ml-1">
-                                *Ensure you enter the exact Property URL (e.g. <code>https://...</code> or <code>sc-domain:...</code>)
+                            <p className="text-[11px] text-slate-400 mt-3 ml-1 font-semibold italic">
+                                *Tip: Use the exact URL property as shown in your GSC dashboard.
                             </p>
                         </div>
                     </div>
                 </Card>
 
-                <div className="sticky top-6">
-                    <Card className="p-6 bg-blue-50 border-blue-100 shadow-sm">
-                        <div className="flex items-start gap-4">
-                            <FaShieldAlt className="text-blue-600 text-2xl mt-1 shrink-0" />
+                <div className="lg:sticky lg:top-8 space-y-6">
+                    <Card className="p-6 bg-slate-900 border-0 shadow-xl overflow-hidden relative group">
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-accent/10 rounded-full blur-2xl group-hover:bg-accent/20 transition-all duration-500"></div>
+                        
+                        <div className="flex items-start gap-4 relative z-10">
+                            <div className="p-3 bg-accent/20 rounded-xl text-accent border border-accent/30">
+                                <FaShieldAlt className="text-xl" />
+                            </div>
                             <div>
-                                <h3 className="font-bold text-slate-800 text-base mb-2">Secure Verification</h3>
-                                <p className="text-sm text-slate-600 leading-relaxed">
-                                    Google requires you to explicitly claim your domain ownership. This ensures that only you can manage indexing for your websites.
+                                <h3 className="font-bold text-white text-base mb-2 tracking-wide">Secure Verification</h3>
+                                <p className="text-slate-400 text-[13px] leading-relaxed font-medium">
+                                    Google requires you to explicitly claim ownership. This high-security protocol ensures that only authorized accounts can push indexing signals for your specific domain.
                                 </p>
                             </div>
                         </div>
                     </Card>
+
+                    <div className="px-6 py-2 border-l-2 border-slate-100">
+                        <p className="text-[11px] text-slate-400 uppercase font-bold tracking-widest leading-loose">
+                            System Requirements:<br/>
+                            • Domain Ownership verified in GSC<br/>
+                            • Active LGTS indexing plan
+                        </p>
+                    </div>
                 </div>
 
             </div>
